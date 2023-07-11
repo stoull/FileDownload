@@ -1,5 +1,6 @@
 import scrapy
 
+from FileDownload.items import FiledownloadItem
 
 class SfulakezaSpider(scrapy.Spider):
     name = "sfulakeza"
@@ -7,11 +8,11 @@ class SfulakezaSpider(scrapy.Spider):
     start_urls = ["http://comet.lehman.cuny.edu/sfulakeza/su21/ttp/slides/"]
 
     def parse(self, response):
-        item = {}
-        ul_html = response.xpath('//ul/li')
-        hrefs = ul_html.css('a::attr(href)').getall()
-        #item["domain_id"] = response.xpath('//input[@id="sid"]/@value').get()
-        #item["name"] = response.xpath('//div[@id="name"]').get()
-        #item["description"] = response.xpath('//div[@id="description"]').get()
-        print(f"xxxxx hrefs: {hrefs}")
-        return item
+        hrefs = response.xpath('//ul/li').css('a::attr(href)').getall()
+        for hrefPath in hrefs:
+            if 'Parent%20Directory' not in hrefPath:    # 过滤父级文件夹
+                new_file_path = response.urljoin(hrefPath)
+                fileItem = FiledownloadItem()
+                fileItem['file_urls'] = [new_file_path]
+                fileItem['original_file_name'] = new_file_path.split('/')[-1]
+                yield fileItem

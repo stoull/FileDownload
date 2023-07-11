@@ -18,21 +18,10 @@ class SfulakezaslidesSpider(CrawlSpider):
 
     def parse_item(self, response):
         hrefs = response.xpath('//ul/li').css('a::attr(href)').getall()
-        print(f"xxxxx hrefs: {hrefs}")
         for hrefPath in hrefs:
-            file_extension = hrefPath.split('.')[-1]
-            if file_extension in ('pdf', 'ppt', 'docx', 'doc', '.md'):
+            if 'Parent%20Directory' not in hrefPath:    # 过滤父级文件夹
                 new_file_path = response.urljoin(hrefPath)
                 fileItem = FiledownloadItem()
-                fileItem.file_urls = [new_file_path]
+                fileItem['file_urls'] = [new_file_path]
+                fileItem['original_file_name'] = new_file_path.split('/')[-1]
                 yield fileItem
-            else:
-                return
-
-
-            # if '/' not in hrefPath:
-            #     # is not a directory
-            #     print(f"hrefPath : {hrefPath} is not a directory")
-            # else:
-            #     # is a directory
-            #     print(f"hrefPath : {hrefPath} is a directory")
